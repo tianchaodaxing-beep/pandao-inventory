@@ -1,6 +1,6 @@
 {
   "name": "pandao-inventory",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "根据销量、库存和采购周期计算补货数量。",
   "license": "MIT",

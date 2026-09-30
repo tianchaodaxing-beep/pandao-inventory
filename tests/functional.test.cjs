@@ -1,0 +1,10 @@
+const test=require('node:test'); const assert=require('node:assert/strict'); const B=require('../core.js');
+const row={sku:'A',daily:8,stock:100,inbound:20,committed:10,lead:14,safety:7,review:7,pack:12,moq:24};
+test("补货目标包装数量和占用库存核对",()=>{const r=B.inventory(row);assert.deepEqual(r,{sku:'A',position:110,reorder:168,target:224,suggestion:120,coverage:11.25,status:'需要补货'});});
+test("库存充足无需起订量",()=>{assert.equal(B.inventory({...row,stock:1000,moq:100}).suggestion,0);});
+test("起订量需要符合包装倍数",()=>{assert.equal(B.inventory({...row,moq:130}).suggestion,132);});
+test("零销量没有可售天数",()=>{const r=B.inventory({...row,daily:0});assert.equal(r.coverage,null);assert.equal(r.status,'无销量参考');assert.equal(r.suggestion,0);});
+test("已占用超过库存时保留缺口",()=>{const r=B.inventory({...row,committed:150});assert.equal(r.position,-30);assert.equal(r.coverage,0);assert.equal(r.suggestion,264);});
+test("零包装和负采购周期被拒绝",()=>{assert.throws(()=>B.inventory({...row,pack:0}));assert.throws(()=>B.inventory({...row,lead:-1}));});
+test("空编号被拒绝",()=>{assert.throws(()=>B.inventory({...row,sku:''}));});
+test("全部参数为零时库存为零",()=>{assert.equal(B.inventory({sku:'B',daily:0,stock:0,inbound:0,committed:0,lead:0,safety:0,review:0,pack:1,moq:0}).suggestion,0);});
